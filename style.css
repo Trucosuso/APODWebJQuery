@@ -5,6 +5,20 @@ No media query for `xs` since this is the default in Bootstrap */
     object-fit: cover;
 }
 
+.btn-outline-success, .btn-outline-success:active, .btn-outline-success:visited {
+    color: #dd5a8e !important;
+    border-color: #dd5a8e !important;
+}
+
+.btn-outline-success:hover {
+    background-color: #dd5a8e !important;
+    color: #212529 !important;
+}
+
+.btn-outline-success:active {
+    
+}
+
 /* Small devices (landscape phones, 576px and up) */
 @media (min-width: 576px) { 
     .apod-thumbnail {
