@@ -95,7 +95,7 @@ class APODMenuBar extends HTMLDivElement {
      */
     constructor(breakpoint = "lg") {
         super();
-        this.classList.add("navbar", "navbar-expand-" + breakpoint, "navbar-light", "bg-light", "sticky-sm-top");
+        this.classList.add("navbar", "navbar-expand-" + breakpoint, "navbar-dark", "bg-dark", "sticky-sm-top");
 
         let container = document.createElement("div");
         container.classList.add("container-fluid");
@@ -103,7 +103,10 @@ class APODMenuBar extends HTMLDivElement {
         this.logo = document.createElement("a");
         this.logo.classList.add("navbar-brand");
         this.logo.href = "#";
-        this.logo.textContent = "APODWeb";
+        let imagenLogo = document.createElement("img");
+        imagenLogo.alt = "";
+        imagenLogo.src = "images/logo.svg";
+        this.logo.appendChild(imagenLogo);
         container.appendChild(this.logo);
 
         let collapseButton = document.createElement("button");
@@ -130,7 +133,7 @@ class APODMenuBar extends HTMLDivElement {
         // Date inputs
         let dateFromLabel = document.createElement("label");
         dateFromLabel.htmlFor = "dateFrom";
-        dateFromLabel.classList.add("form-label", "me-1", "mb-0");
+        dateFromLabel.classList.add("form-label", "me-1", "mb-0", "text-white");
         dateFromLabel.textContent = "From: ";
         form.appendChild(dateFromLabel);
 
@@ -149,7 +152,7 @@ class APODMenuBar extends HTMLDivElement {
 
         let dateToLabel = document.createElement("label");
         dateToLabel.htmlFor = "dateTo";
-        dateToLabel.classList.add("form-label", "me-1", "mb-0");
+        dateToLabel.classList.add("form-label", "me-1", "mb-0", "text-white");
         dateToLabel.textContent = "To: ";
         form.appendChild(dateToLabel);
 
