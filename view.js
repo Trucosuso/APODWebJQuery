@@ -125,7 +125,7 @@ class APODMenuBar extends HTMLDivElement {
         menuContainer.id = "navbarToggler";
 
         let form = document.createElement("form");
-        form.classList.add("d-lg-flex", "align-items-baseline");
+        form.classList.add("d-" + breakpoint + "-flex", "align-items-baseline");
 
         // Date inputs
         let dateFromLabel = document.createElement("label");
@@ -335,10 +335,14 @@ class APODView {
 
         this.ui = appContainer;
         this.controller = controller;
-        this.menu = new APODMenuBar("lg");
+        this.menu = new APODMenuBar("md");
         this.ui.appendChild(this.menu);
-        this.modal = new APODModal("lg");
+        this.modal = new APODModal("md");
         this.ui.appendChild(this.modal);
+
+        this.nextPageToSearch = 1;
+        this.queryToSearch = "";
+        this.nextSearchAvailable = false;
 
         let containerFluid = document.createElement("div");
         containerFluid.classList.add("container-fluid");
@@ -391,6 +395,7 @@ class APODView {
 
     /**
      * Empty the card container and search APOD images by date if text is disabled or by search text if is not
+     * Also add event listener to search again if the user scroll to the botom
      */
     search() {
         this.clearCardContainer();
@@ -399,11 +404,21 @@ class APODView {
         if (this.menu.searchInput.disabled) {
             let from = this.menu.dateFrom.value;
             let to = this.menu.dateTo.value;
+            this.nextSearchAvailable = false;
             this.getApodImagesFromDateInterval(from, to);
         } else {
-            let query = this.menu.searchInput.value;
+            this.queryToSearch = this.menu.searchInput.value;
             // Get only the 12 first results
-            this.getApodImageSearchQuery(query, 12, 1);
+            this.getApodImageSearchQuery(this.queryToSearch, 12, this.nextPageToSearch++);
+            // Event listener to search next page when scrolling down
+            window.addEventListener("scroll", () => {
+                if (this.nextSearchAvailable) {
+                    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+                        this.switchLoadingAnimation();
+                        this.getApodImageSearchQuery(this.queryToSearch, 12, this.nextPageToSearch++);
+                    }
+                }
+            });
         }
     }
 
@@ -504,17 +519,25 @@ class APODView {
      * @param {Number} page Return nth page of APOD images if number is specified.
      */
     getApodImageSearchQuery(query, number, page) {
+        // Do not allow another search if this one is running
+        this.nextSearchAvailable = false;
         // Get the data from the controller
-        this.controller.getApodImageSearchQuery(query, number, page).then(apodImages => {
-            if (apodImages.error) {
-                console.error(apodImages.error.message);
-                this.showErrorMessage("No images found with " + query + ".");
-            } else {
-                for (const apodImage of apodImages) {
-                    this.addNewAPODCard(apodImage.image_thumbnail, apodImage.title, apodImage.copyright, apodImage.date, apodImage.description);
+        this.controller.getApodImageSearchQuery(query, number, page)
+            .finally( () => {
+                this.switchLoadingAnimation();
+                // Allow next search again
+                this.nextSearchAvailable = true;
+            })
+            .then(apodImages => {
+                if (apodImages.error) {
+                    console.error(apodImages.error.message);
+                    this.showErrorMessage("No images found with " + query + ".");
+                } else {
+                    for (const apodImage of apodImages) {
+                        this.addNewAPODCard(apodImage.image_thumbnail, apodImage.title, apodImage.copyright, apodImage.date, apodImage.description);
+                    }
                 }
-            }
-        });
+            });
     }
 }
 
