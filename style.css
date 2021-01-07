@@ -1,0 +1,43 @@
+/* Extra small devices (portrait phones, less than 576px)
+No media query for `xs` since this is the default in Bootstrap */
+.apod-thumbnail {
+    height: 40vw;
+    object-fit: cover;
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) { 
+    .apod-thumbnail {
+        height: 40vw;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) { 
+    .apod-thumbnail {
+        height: 30vw;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) { 
+    .apod-thumbnail {
+        height: 30vw;
+    }
+}
+
+/* X-Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) { 
+    .apod-thumbnail {
+        height: 30vw;
+        max-height: 30vh;
+    }
+}
+
+/* XX-Large devices (larger desktops, 1400px and up) */
+@media (min-width: 1400px) { 
+    .apod-thumbnail {
+        height: 30vw;
+        max-height: 30vh;
+    }
+}
