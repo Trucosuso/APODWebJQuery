@@ -370,6 +370,35 @@ class APODView {
         this.loadAnimation.style.display = "none !important";
         this.ui.appendChild(this.loadAnimation);
 
+        // Button to scroll to top
+        this.scrollToTopButton = $("<button>")
+            .css({ 
+                "position": "fixed",
+                "width": "60px",
+                "height": "60px",
+                "bottom": "40px",
+                "right": "40px",
+                "background-color": "#0C9",
+                "color": "#FFF",
+                "border-radius": "50px",
+                "text-align": "center",
+                "display": "none"
+            })
+            .append($("<i>").addClass("bi bi-arrow-up").css("font-size", "2rem"))
+            .on("click",() => {
+                $("html").animate( { scrollTop: 0 }, 1000);
+            });
+        $(this.ui).append(this.scrollToTopButton);
+
+        // Only show scroll to top button when the user has scroll down a bit
+        $(document).on("scroll", () => {
+            if ($(document).scrollTop() > 800) {
+                $(this.scrollToTopButton).fadeIn();
+            } else {
+                $(this.scrollToTopButton).fadeOut();
+            }
+        });
+
         // Add event listener to search button
         this.menu.searchButton.addEventListener("click", () => {
             this.search();
@@ -414,9 +443,9 @@ class APODView {
             // Get only the 12 first results
             this.getApodImageSearchQuery(this.queryToSearch, 12, this.nextPageToSearch++);
             // Event listener to search next page when scrolling down
-            window.addEventListener("scroll", () => {
+            $(window).on("scroll", () => {
                 if (this.nextSearchAvailable) {
-                    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+                    if ($(window).scrollTop() + $(window).height() >= $(document).height() - 600) {
                         this.switchLoadingAnimation();
                         this.getApodImageSearchQuery(this.queryToSearch, 12, this.nextPageToSearch++);
                     }
@@ -524,22 +553,25 @@ class APODView {
     getApodImageSearchQuery(query, number, page) {
         // Do not allow another search if this one is running
         this.nextSearchAvailable = false;
-        // Get the data from the controller
-        this.controller.getApodImageSearchQuery(query, number, page)
-            .finally( () => {
+
+        // Get the data from the API
+        $.ajax("https://apodapi.herokuapp.com/search/" + "?search_query=" + query + "&number=" + number + "&page=" + page + "&image_thumbnail_size=500")
+            .done((apodImages) => {
+                // Trim image_thumbnail to resolve a correct url
+                for (const apodImage of apodImages) {
+                    apodImage.image_thumbnail = apodImage.image_thumbnail.slice(13, apodImage.image_thumbnail.length - 10);
+
+                    this.addNewAPODCard(apodImage.image_thumbnail, apodImage.title, apodImage.copyright, apodImage.date, apodImage.description);
+                }
+            })
+            .fail((error) => {
+                console.error("Error: " + error);
+                return {"error": error};
+            })
+            .always(() => {
                 this.switchLoadingAnimation();
                 // Allow next search again
                 this.nextSearchAvailable = true;
-            })
-            .then(apodImages => {
-                if (apodImages.error) {
-                    console.error(apodImages.error.message);
-                    this.showErrorMessage("No images found with " + query + ".");
-                } else {
-                    for (const apodImage of apodImages) {
-                        this.addNewAPODCard(apodImage.image_thumbnail, apodImage.title, apodImage.copyright, apodImage.date, apodImage.description);
-                    }
-                }
             });
     }
 }
